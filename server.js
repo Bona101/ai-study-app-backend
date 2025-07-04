@@ -1,70 +1,52 @@
 import express from "express";
-const app = express();
-const PORT = 5000; 
-
-
-
-app.listen(PORT, () => {
-    console.log(`Server is listening at http://localhost:${PORT}`);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-import {GoogleGenAI} from '@google/genai';
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const myfile = await ai.files.upload({
-  file: path.join(media, "Cajun_instruments.jpg"),
-  config: { mimeType: "image/jpeg" },
-});
-console.log("Uploaded file:", myfile);
-
-const result = await ai.models.generateContent({
-  model: "gemini-2.0-flash",
-  contents: createUserContent([
-    createPartFromUri(myfile.uri, myfile.mimeType),
-    "\n\n",
-    "Can you tell me about the instruments in this photo?",
-  ]),
-});
-console.log("result.text=", result.text);
-
-
-
-
 import {
   GoogleGenAI,
   createUserContent,
   createPartFromUri,
 } from "@google/genai";
+import 'dotenv/config';
 
-const ai = new GoogleGenAI({});
+const app = express();
+const PORT = 5000; 
 
-async function main() {
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const myFiles = [];
+async function uploadFile(file, mimeType) {
   const myfile = await ai.files.upload({
-    file: "path/to/sample.mp3",
-    config: { mimeType: "audio/mpeg" },
+    file: file,
+    config: { mimeType: mimeType },
   });
+  myFiles.push(myfile);
+}
 
+// mimeType = "image/jpeg"
+// file = "play.jpg"
+
+
+// prompt = "what is in this image"
+
+async function promptAI(prompt, indexOfFile) {
   const response = await ai.models.generateContent({
     model: "gemini-2.0-flash",
     contents: createUserContent([
-      createPartFromUri(myfile.uri, myfile.mimeType),
-      "Describe this audio clip",
+      createPartFromUri(myFiles[indexOfFile].uri, myFiles[indexOfFile].mimeType),
+      prompt,
     ]),
   });
+  console.log("RESPONSE");
   console.log(response.text);
 }
 
-await main();
+await sendFile();
+
+
+
+
+
+app.listen(PORT, 'localhost', () => {
+    console.log(`Server is listening at http://localhost:${PORT}`);
+});
+
 
 
 
