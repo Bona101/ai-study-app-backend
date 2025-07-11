@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors()); 
+app.use(cors());
 const PORT = 5000;
 
 // Middleware for parsing JSON bodies (for the /prompt endpoint)
@@ -50,7 +50,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const uploadedGeminiFiles = {};
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Server is running' });
+  res.json({ message: 'Server is running' });
 });
 
 // 1. Backend Endpoint for File Upload
@@ -83,13 +83,14 @@ app.post('/upload', upload.single('mediaFile'), async (req, res) => {
     // or use fs.unlink(filePath, (err) => { if (err) console.error(err); });
     // For simplicity, we'll assume a cleanup strategy.
     // fs.unlinkSync(filePath); // Be careful with sync methods in Express routes
-
+    console.log(req.file.originalname, ": ", fileId)
     res.status(200).json({
       message: 'File uploaded to Gemini successfully!',
       fileId: fileId, // Send back a file ID so frontend can reference it
       geminiUri: geminiFile.uri, // Optionally send URI back directly for immediate use
       geminiMimeType: geminiFile.mimeType
     });
+
 
   } catch (error) {
     console.error("Error during file upload to Gemini:", error);
@@ -136,7 +137,7 @@ app.post('/prompt', async (req, res) => {
         prompt,
       ]),
     });
-    
+
     // console.log('FULL RESPONSE:', JSON.stringify(response, null, 2));
     // console.log("END OF RESPONSE");
     const responseText = response.candidates[0].content.parts[0].text;
